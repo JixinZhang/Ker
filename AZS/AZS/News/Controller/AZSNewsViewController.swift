@@ -14,6 +14,7 @@ class AZSNewsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var response: AZSNewsChannelResponse?
     var request: AZSNewsChannelRequest?
+    var refreshControl: UIRefreshControl!
     
     var listRequet: AZSNewsListRequest?
     lazy var listResponse: AZSNewsListResponse = {
@@ -40,6 +41,9 @@ class AZSNewsViewController: UIViewController, UITableViewDelegate, UITableViewD
         tableView.snp.makeConstraints { (make) in
             make.left.right.top.bottom.equalToSuperview()
         }
+        refreshControl = UIRefreshControl.init()
+        refreshControl.addTarget(self, action: #selector(requestListNewest), for: .valueChanged)
+        tableView.refreshControl = refreshControl
         
         self.request = AZSNewsChannelRequest.init()
 //        requestNewest()
@@ -58,7 +62,9 @@ class AZSNewsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: AZSLayoutRightPicCell = tableView.dequeueReusableCell(withIdentifier: rightPicCellIdentifier, for: indexPath) as! AZSLayoutRightPicCell
+//        let cell: AZSLayoutRightPicCell = tableView.dequeueReusableCell(withIdentifier: rightPicCellIdentifier, for: indexPath) as! AZSLayoutRightPicCell
+        let cell: AZSLayoutRightPicCell = tableView.dequeueReusableCell(withIdentifier: rightPicCellIdentifier) as! AZSLayoutRightPicCell
+
         
         guard let model = self.listResponse.data?[indexPath.row] else {
             return cell
@@ -112,7 +118,8 @@ class AZSNewsViewController: UIViewController, UITableViewDelegate, UITableViewD
         dataTask.resume()
     }
     
-    func requestListNewest() {
+    @objc func requestListNewest() {
+        self.refreshControl.beginRefreshing()
         self.listRequet = AZSNewsListRequest.init(category: "news_hot")
         let urlRequest = self.listRequet?.request
         let session = URLSession.shared
@@ -131,6 +138,7 @@ class AZSNewsViewController: UIViewController, UITableViewDelegate, UITableViewD
                 self?.listResponse.appendContent(content: responseObject!)
             }
             DispatchQueue.main.async {
+                self?.refreshControl.endRefreshing()
                 self?.tableView.reloadData()
             }
         }

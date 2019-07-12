@@ -70,12 +70,12 @@ class AZSLayoutRightPicCell: UITableViewCell {
     public func configCell(model: AZSNewsInfoModel) {
         titleLabel.text = model.title
         sourceLabel.text = model.media_name ?? "" + "\(String(describing: model.read_count))阅读"
+        let image = UIImage.init(named: "not_found_loading_226x119_")
         if let imageModel = model.image_list?.first {
             let imageURLString = imageModel.url
             if (imageURLString != nil) {
                 let imageURL = URL.init(string: imageURLString!)!
-                let image = UIImage.init(named: "not_found_loading_226x119_")
-                contentImageView.kf.setImage(with: ImageResource(downloadURL: imageURL), placeholder: image, options: [KingfisherOptionsInfoItem.forceRefresh], progressBlock: ({(_ receivedSize: Int64, _ totalSize: Int64) in
+                contentImageView.kf.setImage(with: ImageResource(downloadURL: imageURL), placeholder: image, options: [KingfisherOptionsInfoItem.cacheOriginalImage], progressBlock: ({(_ receivedSize: Int64, _ totalSize: Int64) in
                     
                 }),
                                              completionHandler: {[weak self](_ image: Image?, _ error: NSError?, _ cacheType: CacheType, _ imageURL: URL?) in
@@ -84,7 +84,7 @@ class AZSLayoutRightPicCell: UITableViewCell {
                                                 }
                 })
             } else {
-                print(model.title)
+                contentImageView.image = image
             }
         }
     }
